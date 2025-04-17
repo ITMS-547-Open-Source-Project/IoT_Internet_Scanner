@@ -6,7 +6,7 @@ import os
 load_dotenv()
 
 ONLYPHE_API_KEY = os.getenv("ONLYPHE_API_KEY")
-API_URL = "https://ipinfo.io/"
+API_URL = "https://www.onyphe.io/"
 
 # The IP you want to query
 ip = "8.8.8.8"
