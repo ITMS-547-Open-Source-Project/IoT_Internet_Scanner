@@ -56,36 +56,34 @@ def greyNoiseFunc(ipList):
     GREYNOISE_API_KEY = os.getenv("GREYNOISE_API_KEY")
     API_URL = "https://api.greynoise.io/v3/community/"
 
-    # Allow the webpage to accept the API key
     HEADERS = {
         "Accept": "application/json",
         "key": GREYNOISE_API_KEY
     }
 
-    # This will send the ip to greyNoise
+    # Placeholder for results
+    results = {}
+
     def check_ip(singleIP):
-        
-        # Send the request
         response = requests.get(API_URL + singleIP, headers=HEADERS)
         if response.status_code == 200:
-
-            # Collect the json
             data = response.json()
-
-            # Send the json for parsing
-            collectedData = collectFlat(data)
+            collectedData = collectFlat(data)  # Assuming you have this defined
             return collectedData
-        
-        # If the request fails
         elif response.status_code == 404:
             print(f"\n IP: {singleIP} - Not seen on GreyNoise")
-
-        # 429: Credits exceeded
+            return None
         else:
             print(f"\n Error checking {singleIP}: {response.status_code}")
-    
+            return None
+
+    # Iterate and collect results
     for ip in ipList:
-        check_ip(ip)
+        result = check_ip(ip)
+        if result is not None:
+            results[ip] = result
+
+    return results
 
 # Takes a list of IP addresses
 # Returns a dictionary of
@@ -184,14 +182,23 @@ def collectFlat(data, prefix=''):
 shodanResults = ['8.8.8.8']
 
 # finds threats with greyNoise
-threatIP = greyNoiseFunc(shodanResults)
-for keys in threatIP.keys():
-    print(keys)
+#greyNoiseResults = greyNoiseFunc(shodanResults)
+greyNoiseResults = {'8.8.8.8': {'ip': '8.8.8.8', 'noise': False, 'riot': True, 'classification': 'benign', 'name': 'Google Public DNS', 'link': 'https://viz.greynoise.io/ip/8.8.8.8', 'last_seen': '2025-04-18', 'message': 'Success'}}
+print(greyNoiseResults)
+try:
+    for keys in greyNoiseResults.keys():
+        ipData = greyNoiseResults[keys]
+        for key in ipData.keys():
+            print(key)
+except AttributeError as e:
+    print(e)
 
 # Enriches with ipInfo
 #ipInfoResults = ipInfo(shodanResults)
-#for keys in ipInfoResults.keys():
-#    print(keys)
+ipInfoResults = {'ip': '8.8.8.8', 'hostname': 'dns.google', 'city': 'Mountain View', 'region': 'California', 'country': 'US', 'loc': '38.0088,-122.1175', 'org': 'AS15169 Google LLC', 'postal': '94043', 'timezone': 'America/Los_Angeles', 'anycast': True}
+print(ipInfoResults)
+for keys in ipInfoResults.keys():
+    print(keys)
 
 ''' Desired keys from onyPhe:
         results.[0].domain.[0]
@@ -205,8 +212,10 @@ for keys in threatIP.keys():
         results.[0].fingerprint.sha1
         results.[0].fingerprint.sha256'''
 #enrichedIP = onyPheTest(shodanResults)
-#for keys in enrichedIP.keys():
-#    print(keys)
+enrichedIP={'count': 30, 'error': 0, 'max_page': 1, 'myip': '104.194.118.53', 'page': 1, 'page_size': 30, 'results.[0].@category': 'ctl', 'results.[0].@timestamp': '2025-04-18T21:12:27.000Z', 'results.[0].basicconstraints.[0]': 'critical', 'results.[0].ca': 'false', 'results.[0].domain.[0]': '200250.xyz', 'results.[0].extkeyusage.[0]': 'serverAuth', 'results.[0].fingerprint.md5': 'a7f23a0b3b02f1fc3f92368e7adae9d2', 'results.[0].fingerprint.sha1': 'bedda102f4368cd243b3da28f61f42e4c99c35c1', 'results.[0].fingerprint.sha256': 'f14fea23240711e03d213f96e2cf7bdb7cb58d1076e7e6ebd9e27e8b7f1f1564', 'results.[0].hostname': '200250.xyz', 'results.[0].ip': '8.8.8.8', 'results.[0].issuer.commonname': 'WE1', 'results.[0].issuer.country': 'US', 'results.[0].issuer.organization': 'Google Trust Services', 'results.[0].keyusage.[0]': 'critical', 'results.[0].keyusage.[1]': 'digitalSignature', 'results.[0].publickey.algorithm': 'id-ecPublicKey', 'results.[0].seen_date': '2025-04-18', 'results.[0].serial': 'bc:05:be:0a:14:2e:ef:71:0d:6d:11:54:ff:0f:4b:47', 'results.[0].signature.algorithm': 'ecdsa-with-SHA256', 'results.[0].source': 'googlexenon2025h2log', 'results.[0].subject.altname.[0]': '*.200250.xyz', 'results.[0].subject.altname.[1]': '200250.xyz', 'results.[0].subject.commonname': '200250.xyz', 'results.[0].tag': '<enterprise field>: tag', 'results.[0].tld.[0]': 'xyz', 'results.[0].validity.notafter': '2025-07-17T21:09:54.000Z', 'results.[0].validity.notbefore': '2025-04-18T20:11:08.000Z', 'results.[0].version': 'v3', 'results.[0].wildcard': 'true', 'results.[1].@category': 'ctl', 'results.[1].@timestamp': '2025-04-18T21:12:07.000Z', 'results.[1].basicconstraints.[0]': 'critical', 'results.[1].ca': 'false', 'results.[1].domain.[0]': 'dade-pardazan.com', 'results.[1].extkeyusage.[0]': 'serverAuth', 'results.[1].extkeyusage.[1]': 'clientAuth', 'results.[1].fingerprint.md5': 'b5a3c19fb827bf8a520eef17cae99c0c', 'results.[1].fingerprint.sha1': '42770805c09955ab0a65b96db921ee21224d5aaa', 'results.[1].fingerprint.sha256': '7db851fee74460e1841104e11681dcdaeb81c29da2c3dbceede219a33e62b6d1', 'results.[1].host.[0]': 'vdi', 'results.[1].hostname.[0]': 'vdi.dade-pardazan.com', 'results.[1].ip': '8.8.8.8', 'results.[1].issuer.commonname': 'R11', 'results.[1].issuer.country': 'US', 'results.[1].issuer.organization': "Let's Encrypt", 'results.[1].keyusage.[0]': 'critical', 'results.[1].keyusage.[1]': 'digitalSignature', 'results.[1].keyusage.[2]': 'keyEncipherment', 'results.[1].publickey.algorithm': 'rsaEncryption', 'results.[1].publickey.exponent': 65537, 'results.[1].publickey.length': 2048, 'results.[1].seen_date': '2025-04-18', 'results.[1].serial': '06:36:08:db:1b:86:ea:dc:f0:01:29:3c:4c:06:3c:43:a0:9e', 'results.[1].signature.algorithm': 'sha256WithRSAEncryption', 'results.[1].source': 'digicertyeti2025log', 'results.[1].subject.altname.[0]': 'vdi.dade-pardazan.com', 'results.[1].subject.commonname': 'vdi.dade-pardazan.com', 'results.[1].tag': '<enterprise field>: tag', 'results.[1].tld.[0]': 'com', 'results.[1].validity.notafter': '2025-07-17T07:35:42.000Z', 'results.[1].validity.notbefore': '2025-04-18T07:35:43.000Z', 'results.[1].version': 'v3', 'results.[1].wildcard': 'false', 'results.[2].@category': 'ctl', 'results.[2].@timestamp': '2025-04-18T21:09:21.000Z', 'results.[2].basicconstraints.[0]': 'critical', 'results.[2].ca': 'false', 'results.[2].domain.[0]': 'uq.edu.au', 'results.[2].extkeyusage.[0]': 'serverAuth', 'results.[2].extkeyusage.[1]': 'clientAuth', 'results.[2].fingerprint.md5': '7ac4788803997b791a7a2c3280d33a42', 'results.[2].fingerprint.sha1': 'b20b334c6f29b7d0b0f8f74b1f640a84c4e0921e', 'results.[2].fingerprint.sha256': '462e67cf73f5ce902038c2f40379f8e2cb9c641bc75252ded7975dcd8bab7129', 'results.[2].host.[0]': 'test-acme-prod', 'results.[2].hostname.[0]': 'test-acme-prod.im-prod.aws.uq.edu.au', 'results.[2].ip': '8.8.8.8', 'results.[2].issuer.commonname': 'ZeroSSL ECC Domain Secure Site CA', 'results.[2].issuer.country': 'AT', 'results.[2].issuer.organization': 'ZeroSSL', 'results.[2].keyusage.[0]': 'critical', 'results.[2].keyusage.[1]': 'digitalSignature', 'results.[2].publickey.algorithm': 'id-ecPublicKey', 'results.[2].seen_date': '2025-04-18', 'results.[2].serial': 'c7:6f:ec:08:a9:05:fa:42:3c:46:46:58:fb:87:12:b2', 'results.[2].signature.algorithm': 'ecdsa-with-SHA384', 'results.[2].source': 'letsencryptoak2025h2', 'results.[2].subdomains.[0]': 'aws.uq.edu.au', 'results.[2].subdomains.[1]': 'im-prod.aws.uq.edu.au', 'results.[2].subject.altname.[0]': 'test-acme-prod.im-prod.aws.uq.edu.au', 'results.[2].subject.commonname': 'test-acme-prod.im-prod.aws.uq.edu.au', 'results.[2].tag': '<enterprise field>: tag', 'results.[2].tld.[0]': 'edu.au', 'results.[2].validity.notafter': '2025-07-17T23:59:59.000Z', 'results.[2].validity.notbefore': '2025-04-18T00:00:00.000Z', 'results.[2].version': 'v3', 'results.[2].wildcard': 'false', 'status': 'ok', 'text': 'Success', 'took': 0.444, 'total': 35334}
+print(enrichedIP)
+for keys in enrichedIP.keys():
+    print(keys)
 
 
 
