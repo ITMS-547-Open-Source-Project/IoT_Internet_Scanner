@@ -184,9 +184,9 @@ def collectFlat(data, prefix=''):
 shodanResults = ['8.8.8.8']
 
 # finds threats with greyNoise
-#threatIP = greyNoiseFunc(shodanResults)
-#for keys in threatIP.keys():
-#    print(keys)
+threatIP = greyNoiseFunc(shodanResults)
+for keys in threatIP.keys():
+    print(keys)
 
 # Enriches with ipInfo
 #ipInfoResults = ipInfo(shodanResults)

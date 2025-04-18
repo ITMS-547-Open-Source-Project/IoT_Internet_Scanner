@@ -18,9 +18,13 @@ import streamlit as st
 import pandas as pd
 import random
 import time
+import APIScript as api
+
+# Query the APIs to get some data
+
  
 # Dummy function to simulate querying public APIs
-def query_threat_info(device_type, country, port):
+def queryThreatInfo(deviceType, country, port):
     # In a real implementation, you would call your API handlers here.
     # For now, we simulate the delay and results.
     time.sleep(1)  # Simulate network/API delay
@@ -50,7 +54,7 @@ with st.form("iot_threat_mapper_form"):
     submitted = st.form_submit_button("Search Devices")
     if submitted:
         with st.spinner("Querying public data..."):
-            results = query_threat_info(device_type, country, port)
+            results = queryThreatInfo(device_type, country, port)
         st.subheader("Scan Results")
         st.write(f"**Total Exposed '{device_type}' Devices in {country}:** {results['device_count']}")
         st.write("**Common Open Ports:**", results["top_ports"])
