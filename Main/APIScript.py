@@ -191,7 +191,7 @@ def collectFlat(data, prefix=''):
 # Length of request
 # Type of request
 #shodanResults = shodanFunc('apache')
-shodanResults = [{'ip': '194.245.150.126', 'organization': 'CSL Computer Service Langenbach GmbH', 'os': None, 'port': 80, 'hostnames': ['vault.ceramtec.com'], 'product': 'Apache httpd'}, {'ip': '209.97.140.243', 'organization': 'DigitalOcean, LLC', 'os': None, 'port': 80, 'hostnames': ['omega.host.webbedfeet.uk'], 'product': 'Apache httpd'}, {'ip': '69.22.188.41', 'organization': 'PhotoShelter, Inc.', 'os': None, 'port': 443, 'hostnames': ['photoshelter.com', 'le2.nyc.bitshelter.com'], 'product': None}, {'ip': '143.244.72.12', 'organization': 'YRC Inc.', 'os': None, 'port': 443, 'hostnames': ['citrix.yrcw.com'], 'product': None}, {'ip': '66.96.163.133', 'organization': 'Newfold Digital, Inc.', 'os': None, 'port': 443, 'hostnames': ['133.163.96.66.static.eigbox.net', 'bizland.com'], 'product': None}]
+shodanResults = [{'ip': '8.8.8.8', 'organization': 'CSL Computer Service Langenbach GmbH', 'os': None, 'port': 80, 'hostnames': ['vault.ceramtec.com'], 'product': 'Apache httpd'}, {'ip': '1.1.1.1', 'organization': 'DigitalOcean, LLC', 'os': None, 'port': 80, 'hostnames': ['omega.host.webbedfeet.uk'], 'product': 'Apache httpd'}, {'ip': '69.22.188.41', 'organization': 'PhotoShelter, Inc.', 'os': None, 'port': 443, 'hostnames': ['photoshelter.com', 'le2.nyc.bitshelter.com'], 'product': None}, {'ip': '143.244.72.12', 'organization': 'YRC Inc.', 'os': None, 'port': 443, 'hostnames': ['citrix.yrcw.com'], 'product': None}, {'ip': '66.96.163.133', 'organization': 'Newfold Digital, Inc.', 'os': None, 'port': 443, 'hostnames': ['133.163.96.66.static.eigbox.net', 'bizland.com'], 'product': None}]
 ipList = [ip['ip'] for ip in shodanResults]
 
 # finds threats with greyNoise
@@ -287,19 +287,69 @@ print("\n===Shodan Keys===")
 for key in shodanResults[0].keys():
     print(key)
 
-'''Combine the data to return these things:
-IP
-OS
-Ports
-Noise --> Give an option to 
-Riot
-Domain
-Host
-Hostname
+keys_to_extract = ["ip", "results.[0].issuer.commname", "results.[0].issuer.country", "results.[0].issuer.organization",
+                   "results.[0].fingerprint.md5","results.[0].fingerprint.sha1", "results.[0].fingerprint.sha256",
+                   "noise", "riot", "classification", "hostname", "city", "region", "country", "loc", "org",
+                   "organization", "os", "port", "hostnames", "product"]
 
-Issuer Commonname
-Issuer Organization
-Fingerprint Hashes'''
+sources = [onyPHERClean, greyNoiseResults, ipInfoResults]
+
+combinedData = {}
+
+# Combine the data into one dictionary
+for entry in shodanResults:
+    _id = entry["ip"]
+    combined = {}
+
+    for key in keys_to_extract:
+        #Try from shodanResults
+        if key in entry:
+            combined[key] = entry[key]
+            continue
+        
+        # Then try from the other sources
+        for dictionary in sources:
+            if _id in dictionary and key in dictionary[_id]:
+                combined[key] = dictionary[_id][key]
+                break
+    
+    combinedData[_id] = combined
+
+for key in combinedData.keys():
+    print(f"\n==={key} Data===")
+    for keys, values in combinedData[key].items():
+        print(f"{keys}:{values}")
+
+'''Combine the data to return these things:
+onhyPHE:
+results.[0].issuer.commname
+results.[0].issuer.country
+results.[0].issuer.organization
+results.[0].fingerprint.md5
+results.[0].fingerprint.sha1
+results.[0].fingerprint.sha256
+
+GreyNoise:
+noise
+riot - potentially filter out all noise
+classification
+
+IpInfo:
+hostname
+city
+region
+country
+loc
+org
+
+Shodan:
+ip
+organization
+os
+port
+hostnames
+product
+'''
 
 
 
