@@ -18,6 +18,7 @@ import shodan
 import requests
 import pandas as pd
 import streamlit as st
+import csv
 from dotenv import load_dotenv
 import os
 
@@ -31,7 +32,7 @@ load_dotenv()
 # Returns a dictionary of all found matches
 # org, os, port, hostnames, products
 # For getting all the internet facing devices
-def shodanFunc(device_type: str, limit: int = 5):
+def _shodanFunc(device_type: str, limit: int = 5) -> list[dict]:
     """
     Searches Shodan for devices matching the given type and returns a list of device info dictionaries.
 
@@ -70,7 +71,7 @@ def shodanFunc(device_type: str, limit: int = 5):
 # Accepts a list of IP strings
 # Returns a nested dictionary where the IP is the key
 # For threat information
-def greyNoiseFunc(ipList):
+def _greyNoiseFunc(ipList) -> dict:
     print(ipList)
 
     # Load the key and prepare the greynoise webpage
@@ -110,7 +111,7 @@ def greyNoiseFunc(ipList):
 # Returns a nested dictionary where the key is the IP
 # More information than Shodan
 # Ip, Hostname, City, Region, Country, Lat/Long, Organization, ASN, Carrier, and VPN/Proxy
-def ipInfo(ipAddressList):
+def _ipInfo(ipAddressList) -> dict:
     IPINFO_API_KEY = os.getenv("IPINFO_API_KEY")
     API_URL = "https://ipinfo.io/"
 
@@ -141,8 +142,7 @@ def ipInfo(ipAddressList):
     
 # Takes a list of IPs 
 # Enriches the IP data
-# Returns a json
-def onyPheTest(ipAddressList):
+def _onyPheTest(ipAddressList) -> dict:
     ONLYPHE_API_KEY = os.getenv("ONLYPHE_API_KEY")
     API_URL = "https://www.onyphe.io/api/v2"
 
@@ -185,7 +185,7 @@ def onyPheTest(ipAddressList):
     return results
 
 # Recursive function to parse complex json dictionaries
-def collectFlat(data, prefix=''):
+def collectFlat(data, prefix='') -> dict:
     result = {}
     
     if isinstance(data, dict):
@@ -200,6 +200,123 @@ def collectFlat(data, prefix=''):
 
     return result
 
+# Write to CSV
+def csvWrite(data) -> csv:
+    # Extract all fieldnames from one of the inner dictionaries
+    fieldnames = ['ID'] + list(next(iter(data.values())).keys())
+
+    with open('IoTScanner_Data.csv', 'w', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        for key, inner_dict in data.items():
+            row = {'ID': key}
+            row.update(inner_dict)
+            writer.writerow(row)
+
+# The following functions are all for creating and retrieving dictionaries
+
+# This will retrieve and enrich the requested data
+def combineAndGetAPIData(deviceType) -> dict[dict]:
+
+    # Call ShodanAPI
+    shodanResults = _shodanFunc(deviceType)
+    ipList = [ip['ip'] for ip in shodanResults] # Create a list of found IP addresses
+
+    # Call GreyNoiseAPI
+    greyNoiseResults = _greyNoiseFunc(ipList)
+
+    # Call IpInfoAPI
+    ipInfoResults = _ipInfo(ipList)
+
+    # Call OnyPheAPI
+    onyPheResults = _onyPheTest(ipList)
+    
+    # Next, we combine all three APIs into a comprehensive dataset
+
+    # The specific information that is wanted so we can display it to the user, list of subkeys
+    keysToExtract = ["ip", "results.[0].issuer.commname", "results.[0].issuer.country", "results.[0].issuer.organization",
+                    "results.[0].fingerprint.md5","results.[0].fingerprint.sha1", "results.[0].fingerprint.sha256",
+                    "noise", "riot", "classification", "hostname", "city", "region", "country", "loc", "org",
+                    "organization", "os", "port", "hostnames", "product"]
+    
+    sources = [greyNoiseResults, ipInfoResults, onyPheResults]
+
+    combinedData = {}
+
+    for entry in shodanResults:
+        _id = entry["ip"]
+        combined = {}
+    
+        for key in keysToExtract:
+
+            # First try Shodan
+            if key in entry:
+                combined[key] = entry[key]
+                continue
+            
+            # Then try from other sources
+            for dictionary in sources:
+                if _id in dictionary and key in dictionary[_id]:
+                    combined[key] = dictionary[_id][key]
+                    break
+        
+        combinedData[_id] = combined
+
+    return combinedData
+
+# The following functions are used to retrieve specific data from the combined Dict
+
+# Open ports and how many of each
+def getPortCount(combinedData) -> dict:
+
+    # Create a dict of ports and count them
+    portCount = {}
+    for key in combinedData.keys():
+        if 'port' in combinedData[key]:
+            port = combinedData[key]['port']
+            if port not in portCount:
+                portCount[port] = 1
+            else:
+                portCount[port] += 1
+        else:
+            continue
+    
+    return portCount   
+
+# Types of Operating Systems and how many
+def getOS(combinedData) -> dict:
+    # Create a dict of OS types and count them
+    osCount = {}
+    for key in combinedData.keys():
+        if 'os' in combinedData[key]:
+            operatingsystem = combinedData[key]['os']
+            if operatingsystem not in osCount:
+                osCount[operatingsystem] = 1
+            else:
+                osCount[operatingsystem] += 1
+        else:
+            continue
+    return osCount
+
+# Locations of each device
+def getLocation(combinedData) -> pd.DataFrame:
+
+    locationList = []
+    for key in combinedData.keys():
+        if 'loc' in combinedData[key]:
+            location = combinedData[key]["loc"]
+            tempLocList = [float(coordinates) for coordinates in location.split(",")]
+            locationList.append(tempLocList)
+        else:
+            continue
+
+    locationDataFrame = pd.DataFrame(
+        [[lat, lon] for lat, lon in locationList],
+        columns=["lat", "lon"])
+    
+    return locationDataFrame
+
+'''
 # Runs the Shodan Func against an 'apache' option, this now is a dictionary of lots of data
 # IP: {ip}
 # HTTP Banner
@@ -270,6 +387,7 @@ onyPHERClean = {
 #greyNoiseResults
 #ipInfoResults
 #onyPHERClean
+
 for key in onyPHERClean.keys():
     print(f"\n===onyPhe Data: {key}===")
     for key, value in onyPHERClean[key].items():
@@ -389,7 +507,9 @@ locationDataFrame = pd.DataFrame(
 print("\nLocations")
 print(locationDataFrame)
 
-'''
+
+
+
 # User Form 
 with st.form("IoT Threat Mapper"):
     deviceType = st.text_input("IoT Device Type", "Camera")
