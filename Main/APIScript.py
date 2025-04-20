@@ -1,5 +1,23 @@
+#    Template and Processing for our GUI
+#    Copyright (C) 2025 Kaleb Austgen
+
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+
+#    This program is distributed in the hope that it will be useful,s
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 import shodan
 import requests
+import pandas as pd
+import streamlit as st
 from dotenv import load_dotenv
 import os
 
@@ -213,17 +231,18 @@ ipInfoResults = {'8.8.8.8': {'ip': '8.8.8.8', 'hostname': 'dns.google', 'city': 
 #for keys in ipInfoResults.keys():
 #    print(keys)
 
-''' Desired keys from onyPhe:
-        results.[0].domain.[0]
-        results.[0].host.[0]
-        results.[0].hostname.[0]
-        results.[0].ip
-        results.[0].issuer.commonname
-        results.[0].issuer.country
-        results.[0].issuer.organization'
-        results.[0].fingerprint.md5
-        results.[0].fingerprint.sha1
-        results.[0].fingerprint.sha256'''
+#        Desired keys from onyPhe:
+#        results.[0].domain.[0]
+#        results.[0].host.[0]
+#        results.[0].hostname.[0]
+#        results.[0].ip
+#        results.[0].issuer.commonname
+#        results.[0].issuer.country
+#        results.[0].issuer.organization
+#        results.[0].fingerprint.md5
+#        results.[0].fingerprint.sha1
+#        results.[0].fingerprint.sha256
+
 #onyPHEResults = onyPheTest(ipList)
 onyPHEResults={'8.8.8.8': {'count': 30, 'error': 0, 'max_page': 1, 'myip': '104.194.118.53', 'page': 1, 'page_size': 30, 'results.[0].@category': 'ctl', 'results.[0].@timestamp': '2025-04-18T22:10:19.000Z', 'results.[0].basicconstraints.[0]': 'critical', 'results.[0].ca': 'false', 'results.[0].domain.[0]': 'uq.edu.au', 'results.[0].extkeyusage.[0]': 'serverAuth', 'results.[0].extkeyusage.[1]': 'clientAuth', 'results.[0].fingerprint.md5': '2f96dd3cd52d629337127b26c143eeee', 'results.[0].fingerprint.sha1': 'b6e8f8fa4e9b8917aaab4276625ac12ebd1b7d82', 'results.[0].fingerprint.sha256': '9d5b06233574eefa4efde7db09d7f3c2b5f4a472f213423f49cfab8226113991', 'results.[0].host.[0]': 'test-acme-prod', 'results.[0].hostname.[0]': 'test-acme-prod.im-prod.aws.uq.edu.au', 'results.[0].ip': '8.8.8.8', 'results.[0].issuer.commonname': 'ZeroSSL ECC Domain Secure Site CA', 'results.[0].issuer.country': 'AT', 'results.[0].issuer.organization': 'ZeroSSL', 'results.[0].keyusage.[0]': 'critical', 'results.[0].keyusage.[1]': 'digitalSignature', 'results.[0].publickey.algorithm': 'id-ecPublicKey', 'results.[0].seen_date': '2025-04-18', 'results.[0].serial': 'c6:0e:d7:d2:32:67:32:cd:e2:65:51:6d:92:a4:b7:5f', 'results.[0].signature.algorithm': 'ecdsa-with-SHA384', 'results.[0].source': 'letsencryptoak2025h2', 'results.[0].subdomains.[0]': 'aws.uq.edu.au', 'results.[0].subdomains.[1]': 'im-prod.aws.uq.edu.au', 'results.[0].subject.altname.[0]': 'test-acme-prod.im-prod.aws.uq.edu.au', 'results.[0].subject.commonname': 'test-acme-prod.im-prod.aws.uq.edu.au', 'results.[0].tag': '<enterprise field>: tag', 'results.[0].tld.[0]': 'edu.au', 'results.[0].validity.notafter': '2025-07-17T23:59:59.000Z', 'results.[0].validity.notbefore': '2025-04-18T00:00:00.000Z', 'results.[0].version': 'v3', 'results.[0].wildcard': 'false', 'results.[1].@category': 'ctl', 'results.[1].@timestamp': '2025-04-18T22:06:48.000Z', 'results.[1].basicconstraints.[0]': 'critical', 'results.[1].ca': 'false', 'results.[1].domain.[0]': 'kkkmkm.com', 'results.[1].extkeyusage.[0]': 'serverAuth', 'results.[1].fingerprint.md5': '387aa67fe094278d003517ebbf390bca', 'results.[1].fingerprint.sha1': '4163fb3116337f9e6d0c3dbcd2b939846e67f08a', 'results.[1].fingerprint.sha256': '84be525a9b7652d0d034f9a070b99ffa0b7d87ee1263efd6e17855f15f5f4394', 'results.[1].hostname': 'kkkmkm.com', 'results.[1].ip': '8.8.8.8', 'results.[1].issuer.commonname': 'WE1', 'results.[1].issuer.country': 'US', 'results.[1].issuer.organization': 'Google Trust Services', 'results.[1].keyusage.[0]': 'critical', 'results.[1].keyusage.[1]': 'digitalSignature', 'results.[1].publickey.algorithm': 'id-ecPublicKey', 'results.[1].seen_date': '2025-04-18', 'results.[1].serial': 'df:07:d1:1b:fa:6e:30:8e:13:01:ba:37:37:ee:4a:c2', 'results.[1].signature.algorithm': 'ecdsa-with-SHA256', 'results.[1].source': 'digicertsphinx2025h2log', 'results.[1].subject.altname.[0]': '*.kkkmkm.com', 'results.[1].subject.altname.[1]': 'kkkmkm.com', 'results.[1].subject.commonname': 'kkkmkm.com', 'results.[1].tag': '<enterprise field>: tag', 'results.[1].tld.[0]': 'com', 'results.[1].validity.notafter': '2025-07-17T22:04:22.000Z', 'results.[1].validity.notbefore': '2025-04-18T21:06:42.000Z', 'results.[1].version': 'v3', 'results.[1].wildcard': 'true', 'results.[2].@category': 'ctl', 'results.[2].@timestamp': '2025-04-18T21:56:04.000Z', 'results.[2].basicconstraints.[0]': 'critical', 'results.[2].ca': 'false', 'results.[2].domain.[0]': 'go1.games', 'results.[2].extkeyusage.[0]': 'serverAuth', 'results.[2].extkeyusage.[1]': 'clientAuth', 'results.[2].fingerprint.md5': 'e881be83e49fc4ab86df0231361ec2bc', 'results.[2].fingerprint.sha1': '174c2daa14900f0a0257250efa722842eff9bfe7', 'results.[2].fingerprint.sha256': '68f9e069aa8958c27ca2f0a513dd5463daa1475890b7b5f9a7afea84646a2708', 'results.[2].hostname': 'go1.games', 'results.[2].ip': '8.8.8.8', 'results.[2].issuer.commonname': 'E5', 'results.[2].issuer.country': 'US', 'results.[2].issuer.organization': "Let's Encrypt", 'results.[2].keyusage.[0]': 'critical', 'results.[2].keyusage.[1]': 'digitalSignature', 'results.[2].publickey.algorithm': 'id-ecPublicKey', 'results.[2].seen_date': '2025-04-18', 'results.[2].serial': '05:ad:e7:8f:3f:e1:43:ad:86:de:fa:7a:b2:11:67:8d:d6:04', 'results.[2].signature.algorithm': 'ecdsa-with-SHA384', 'results.[2].source': 'cloudflarenimbus2025', 'results.[2].subject.altname.[0]': 'go1.games', 'results.[2].subject.altname.[1]': '*.go1.games', 'results.[2].subject.commonname': 'go1.games', 'results.[2].tag': '<enterprise field>: tag', 'results.[2].tld.[0]': 'games', 'results.[2].validity.notafter': '2025-07-11T19:20:28.000Z', 'results.[2].validity.notbefore': '2025-04-12T19:20:29.000Z', 'results.[2].version': 'v3', 'results.[2].wildcard': 'true', 'status': 'ok', 'text': 'Success', 'took': 0.205, 'total': 35350}, '1.1.1.1': {'count': 30, 'error': 0, 'max_page': 1, 'myip': '104.194.118.53', 'page': 1, 'page_size': 30, 'results.[0].@category': 'ctl', 'results.[0].@timestamp': '2025-04-18T21:53:45.000Z', 'results.[0].basicconstraints.[0]': 'critical', 'results.[0].ca': 'false', 'results.[0].domain.[0]': 'mcp-app.com', 'results.[0].domain.[1]': 'theranest.com', 'results.[0].domain.[2]': 'webaba-app.com', 'results.[0].extkeyusage.[0]': 'serverAuth', 'results.[0].extkeyusage.[1]': 'clientAuth', 'results.[0].fingerprint.md5': 'b3ef04c6fc615e247169bad4ce8a0e9e', 'results.[0].fingerprint.sha1': '94f7e76678d9eadb1b9e8823307bb43327790080', 'results.[0].fingerprint.sha256': '8d48334303aba3aa8a616844115e5243dec0273c13249c60454e88e7a41f5ad1', 'results.[0].host.[0]': 'do344527', 'results.[0].hostname.[0]': 'do344527.dev.mcp-app.com', 'results.[0].hostname.[1]': 'do344527.dev.theranest.com', 'results.[0].hostname.[2]': 'do344527.dev.webaba-app.com', 'results.[0].ip.[0]': '1.1.1.1', 'results.[0].ip.[1]': '255.255.255.255', 'results.[0].issuer.commonname': 'ZeroSSL RSA Domain Secure Site CA', 'results.[0].issuer.country': 'AT', 'results.[0].issuer.organization': 'ZeroSSL', 'results.[0].keyusage.[0]': 'critical', 'results.[0].keyusage.[1]': 'digitalSignature', 'results.[0].keyusage.[2]': 'keyEncipherment', 'results.[0].publickey.algorithm': 'rsaEncryption', 'results.[0].publickey.exponent': 65537, 'results.[0].publickey.length': 2048, 'results.[0].seen_date': '2025-04-18', 'results.[0].serial': '55:27:70:e6:28:b2:d0:f3:38:eb:7f:70:19:8c:1e:a1', 'results.[0].signature.algorithm': 'sha384WithRSAEncryption', 'results.[0].source': 'googlexenon2025h2log', 'results.[0].subdomains.[0]': 'dev.mcp-app.com', 'results.[0].subdomains.[1]': 'dev.theranest.com', 'results.[0].subdomains.[2]': 'dev.webaba-app.com', 'results.[0].subject.altname.[0]': '*.do344527.dev.theranest.com', 'results.[0].subject.altname.[1]': '*.do344527.dev.mcp-app.com', 'results.[0].subject.altname.[2]': '*.do344527.dev.webaba-app.com', 'results.[0].subject.commonname': '*.do344527.dev.theranest.com', 'results.[0].tag': '<enterprise field>: tag', 'results.[0].tld.[0]': 'com', 'results.[0].validity.notafter': '2025-07-17T23:59:59.000Z', 'results.[0].validity.notbefore': '2025-04-18T00:00:00.000Z', 'results.[0].version': 'v3', 'results.[0].wildcard': 'true', 'results.[1].@category': 'ctl', 'results.[1].@timestamp': '2025-04-18T21:52:49.000Z', 'results.[1].basicconstraints.[0]': 'critical', 'results.[1].ca': 'false', 'results.[1].domain.[0]': 'mcp-app.com', 'results.[1].domain.[1]': 'theranest.com', 'results.[1].domain.[2]': 'webaba-app.com', 'results.[1].extkeyusage.[0]': 'serverAuth', 'results.[1].extkeyusage.[1]': 'clientAuth', 'results.[1].fingerprint.md5': '76f5102d6fca2364f97b7dd9180f082d', 'results.[1].fingerprint.sha1': 'd05bd7ac22ce6f365fdeb03088958d2b04aab176', 'results.[1].fingerprint.sha256': '473f046815cd120c46fc224fd8929c36303aa2fcbaa0602cf0399b1a845da8cf', 'results.[1].host.[0]': 'do344527', 'results.[1].hostname.[0]': 'do344527.dev.mcp-app.com', 'results.[1].hostname.[1]': 'do344527.dev.theranest.com', 'results.[1].hostname.[2]': 'do344527.dev.webaba-app.com', 'results.[1].ip.[0]': '1.1.1.1', 'results.[1].ip.[1]': '255.255.255.255', 'results.[1].issuer.commonname': 'ZeroSSL RSA Domain Secure Site CA', 'results.[1].issuer.country': 'AT', 'results.[1].issuer.organization': 'ZeroSSL', 'results.[1].keyusage.[0]': 'critical', 'results.[1].keyusage.[1]': 'digitalSignature', 'results.[1].keyusage.[2]': 'keyEncipherment', 'results.[1].publickey.algorithm': 'rsaEncryption', 'results.[1].publickey.exponent': 65537, 'results.[1].publickey.length': 2048, 'results.[1].seen_date': '2025-04-18', 'results.[1].serial': '55:27:70:e6:28:b2:d0:f3:38:eb:7f:70:19:8c:1e:a1', 'results.[1].signature.algorithm': 'sha384WithRSAEncryption', 'results.[1].source': 'letsencryptoak2025h2', 'results.[1].subdomains.[0]': 'dev.mcp-app.com', 'results.[1].subdomains.[1]': 'dev.theranest.com', 'results.[1].subdomains.[2]': 'dev.webaba-app.com', 'results.[1].subject.altname.[0]': '*.do344527.dev.theranest.com', 'results.[1].subject.altname.[1]': '*.do344527.dev.mcp-app.com', 'results.[1].subject.altname.[2]': '*.do344527.dev.webaba-app.com', 'results.[1].subject.commonname': '*.do344527.dev.theranest.com', 'results.[1].tag': '<enterprise field>: tag', 'results.[1].tld.[0]': 'com', 'results.[1].validity.notafter': '2025-07-17T23:59:59.000Z', 'results.[1].validity.notbefore': '2025-04-18T00:00:00.000Z', 'results.[1].version': 'v3', 'results.[1].wildcard': 'true', 'results.[2].@category': 'ctl', 'results.[2].@timestamp': '2025-04-18T21:52:49.000Z', 'results.[2].basicconstraints.[0]': 'critical', 'results.[2].ca': 'false', 'results.[2].domain.[0]': 'mcp-app.com', 'results.[2].domain.[1]': 'theranest.com', 'results.[2].domain.[2]': 'webaba-app.com', 'results.[2].extkeyusage.[0]': 'serverAuth', 'results.[2].extkeyusage.[1]': 'clientAuth', 'results.[2].fingerprint.md5': 'b3ef04c6fc615e247169bad4ce8a0e9e', 'results.[2].fingerprint.sha1': '94f7e76678d9eadb1b9e8823307bb43327790080', 'results.[2].fingerprint.sha256': '8d48334303aba3aa8a616844115e5243dec0273c13249c60454e88e7a41f5ad1', 'results.[2].host.[0]': 'do344527', 'results.[2].hostname.[0]': 'do344527.dev.mcp-app.com', 'results.[2].hostname.[1]': 'do344527.dev.theranest.com', 'results.[2].hostname.[2]': 'do344527.dev.webaba-app.com', 'results.[2].ip.[0]': '255.255.255.255', 'results.[2].ip.[1]': '1.1.1.1', 'results.[2].issuer.commonname': 'ZeroSSL RSA Domain Secure Site CA', 'results.[2].issuer.country': 'AT', 'results.[2].issuer.organization': 'ZeroSSL', 'results.[2].keyusage.[0]': 'critical', 'results.[2].keyusage.[1]': 'digitalSignature', 'results.[2].keyusage.[2]': 'keyEncipherment', 'results.[2].publickey.algorithm': 'rsaEncryption', 'results.[2].publickey.exponent': 65537, 'results.[2].publickey.length': 2048, 'results.[2].seen_date': '2025-04-18', 'results.[2].serial': '55:27:70:e6:28:b2:d0:f3:38:eb:7f:70:19:8c:1e:a1', 'results.[2].signature.algorithm': 'sha384WithRSAEncryption', 'results.[2].source': 'letsencryptoak2025h2', 'results.[2].subdomains.[0]': 'dev.mcp-app.com', 'results.[2].subdomains.[1]': 'dev.theranest.com', 'results.[2].subdomains.[2]': 'dev.webaba-app.com', 'results.[2].subject.altname.[0]': '*.do344527.dev.webaba-app.com', 'results.[2].subject.altname.[1]': '*.do344527.dev.mcp-app.com', 'results.[2].subject.altname.[2]': '*.do344527.dev.theranest.com', 'results.[2].subject.commonname': '*.do344527.dev.theranest.com', 'results.[2].tag': '<enterprise field>: tag', 'results.[2].tld.[0]': 'com', 'results.[2].validity.notafter': '2025-07-17T23:59:59.000Z', 'results.[2].validity.notbefore': '2025-04-18T00:00:00.000Z', 'results.[2].version': 'v3', 'results.[2].wildcard': 'true', 'status': 'ok', 'text': 'Success', 'took': 0.389, 'total': 51080}, '58.220.219.247': {'count': 0, 'error': 0, 'max_page': 1, 'myip': '104.194.118.53', 'page': 1, 'page_size': 0, 'status': 'ok', 'text': 'Success', 'took': 0.063, 'total': 0}}
 #print(onyPHEResults)
@@ -271,6 +290,7 @@ for ip in shodanResults:
     for key, value in ip.items():
         print(f"{key}:{value}")
 
+# Displays all keys
 print("\n===onyPhe Keys===")
 for key in onyPHERClean['8.8.8.8'].keys():
     print(key)
@@ -287,13 +307,14 @@ print("\n===Shodan Keys===")
 for key in shodanResults[0].keys():
     print(key)
 
+# The specific information that is wanted so we can display it to the user, list of subkeys
 keys_to_extract = ["ip", "results.[0].issuer.commname", "results.[0].issuer.country", "results.[0].issuer.organization",
                    "results.[0].fingerprint.md5","results.[0].fingerprint.sha1", "results.[0].fingerprint.sha256",
                    "noise", "riot", "classification", "hostname", "city", "region", "country", "loc", "org",
                    "organization", "os", "port", "hostnames", "product"]
 
+# For combining the Dictionaries
 sources = [onyPHERClean, greyNoiseResults, ipInfoResults]
-
 combinedData = {}
 
 # Combine the data into one dictionary
@@ -315,43 +336,56 @@ for entry in shodanResults:
     
     combinedData[_id] = combined
 
+# Print the combined dictionaries 
 for key in combinedData.keys():
     print(f"\n==={key} Data===")
     for keys, values in combinedData[key].items():
         print(f"{keys}:{values}")
 
-'''Combine the data to return these things:
-onhyPHE:
-results.[0].issuer.commname
-results.[0].issuer.country
-results.[0].issuer.organization
-results.[0].fingerprint.md5
-results.[0].fingerprint.sha1
-results.[0].fingerprint.sha256
+# Create a dict of ports and count them
+portCount = {}
+for key in combinedData.keys():
+    if 'port' in combinedData[key]:
+        port = combinedData[key]['port']
+        if port not in portCount:
+            portCount[port] = 1
+        else:
+            portCount[port] += 1
+    else:
+        continue
+        
+print(portCount)
 
-GreyNoise:
-noise
-riot - potentially filter out all noise
-classification
+# Create a list of pd.DataFrames of location in (lat:long) order
+locationList = []
+for key in combinedData.keys():
+    if 'loc' in combinedData[key]:
+        location = combinedData[key]["loc"]
+        tempLocList = [float(coordinates) for coordinates in location.split(",")]
+        locationList.append(tempLocList)
+    else:
+        continue
 
-IpInfo:
-hostname
-city
-region
-country
-loc
-org
+locationDataFrame = pd.DataFrame(
+    [[lat, lon] for lat, lon in locationList],
+    columns=["lat", "lon"])
 
-Shodan:
-ip
-organization
-os
-port
-hostnames
-product
-'''
+print(locationDataFrame)
 
-
-
-
+# User Form 
+with st.form("IoT Threat Mapper"):
+    deviceType = st.text_input("IoT Device Type", "Camera")
+    country = st.text_input("Country (ISO code or name)", "US")
+    port = st.text_input("Optional: Specific Port", "")
+    submitted = st.form_submit_button("Search Devices")
+    if submitted:
+        with st.spinner("Querying public data..."):
+            print("Got data")
+        st.subheader("Scan Results")
+        st.write(f"**Total Exposed {deviceType} Facing the Internet: {len(shodanResults)}'")
+        st.write(f"**Common Open Ports:**", portCount)
+        st.subheader("Device Geolocations")
+        st.markdown("The map below shows exactly where the devices are")
+        st.map(locationDataFrame)
+        st.info("Note: this is still a pre-alpha test")
 
