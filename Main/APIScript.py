@@ -353,8 +353,24 @@ for key in combinedData.keys():
             portCount[port] += 1
     else:
         continue
-        
+
+print("\nOpen Ports Found")
 print(portCount)
+
+# Create a dict of OS types and count them
+osCount = {}
+for key in combinedData.keys():
+    if 'os' in combinedData[key]:
+        operatingsystem = combinedData[key]['os']
+        if operatingsystem not in osCount:
+            osCount[operatingsystem] = 1
+        else:
+            osCount[operatingsystem] += 1
+    else:
+        continue
+
+print("\nOS Types Found")
+print(osCount)
 
 # Create a list of pd.DataFrames of location in (lat:long) order
 locationList = []
@@ -370,8 +386,10 @@ locationDataFrame = pd.DataFrame(
     [[lat, lon] for lat, lon in locationList],
     columns=["lat", "lon"])
 
+print("\nLocations")
 print(locationDataFrame)
 
+'''
 # User Form 
 with st.form("IoT Threat Mapper"):
     deviceType = st.text_input("IoT Device Type", "Camera")
@@ -388,4 +406,4 @@ with st.form("IoT Threat Mapper"):
         st.markdown("The map below shows exactly where the devices are")
         st.map(locationDataFrame)
         st.info("Note: this is still a pre-alpha test")
-
+'''
