@@ -32,7 +32,7 @@ load_dotenv()
 # Returns a dictionary of all found matches
 # org, os, port, hostnames, products
 # For getting all the internet facing devices
-def _shodanFunc(device_type: str, limit: int = 5) -> list[dict]:
+def _shodanFunc(device_type: str) -> list[dict]:
     """
     Searches Shodan for devices matching the given type and returns a list of device info dictionaries.
 
@@ -50,7 +50,7 @@ def _shodanFunc(device_type: str, limit: int = 5) -> list[dict]:
 
     try:
         results = api.search(device_type)
-        matches = results['matches'][:limit]
+        matches = results['matches']
 
         for result in matches:
             device = {

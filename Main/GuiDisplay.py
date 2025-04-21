@@ -54,13 +54,14 @@ else:
             submitted = st.form_submit_button("Search Devices")
             if submitted:
                 with st.spinner("Querying public data..."):
-                    #data = api.combineAndGetAPIData(deviceType)
-                    #portCount = api.getPortCount(data)
-                    #osCount = api.getOS(data)
-                    #location = api.getLocation(data)
+                    data = api.combineAndGetAPIData(deviceType)
+                    portCount = api.getPortCount(data)
+                    osCount = api.getOS(data)
+                    location = api.getLocation(data)
+                    orgList = api.getOrganizations(data)
                     deviceType = 'apache'
-                    data, portCount, osCount, location, orgList= api.tempReturnData()
-                    api.csvWrite(data)
+                   #data, portCount, osCount, location, orgList= api.tempReturnData()
+                   #api.csvWrite(data)
                     dataTable = api.getTableData(data)
     
     with col2:
