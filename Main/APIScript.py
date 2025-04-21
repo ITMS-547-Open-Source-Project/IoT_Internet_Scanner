@@ -296,7 +296,28 @@ def getOS(combinedData) -> dict:
                 osCount[operatingsystem] += 1
         else:
             continue
+
     return osCount
+
+# Product names
+def getProducts(combinedData) -> dict:
+    # Create a dict of product names and their count
+    productCount = {}
+    for key in combinedData.keys():
+        if 'product' in combinedData[key]:
+            product = combinedData[key]['os']
+            if operatingsystem not in productCount:
+                productCount[product] = 1
+            else:
+                productCount[product] += 1
+
+def getOrganizations(combinedData) -> list:
+    orgList = []
+    for key in combinedData.keys():
+        if 'organization' in combinedData[key]:
+            orgList.append(combinedData[key]['organization'])
+    return orgList
+            
 
 # Locations of each device
 def getLocation(combinedData) -> pd.DataFrame:
@@ -315,6 +336,17 @@ def getLocation(combinedData) -> pd.DataFrame:
         columns=["lat", "lon"])
     
     return locationDataFrame
+
+# Build DataFrame from data
+def getTableData(combinedData) -> pd.DataFrame:
+
+    dataTable = pd.DataFrame.from_dict(combinedData, orient='index').reset_index()
+    dataTable = dataTable.rename(columns={'index': 'ip'})
+    # Remove one of the "os" columns
+    dataTable = dataTable.loc[:, ~dataTable.columns.duplicated()]
+
+    return dataTable
+
 
 
 # Runs the Shodan Func against an 'apache' option, this now is a dictionary of lots of data
@@ -507,8 +539,14 @@ locationDataFrame = pd.DataFrame(
 print("\nLocations")
 print(locationDataFrame)
 
+orgList = []
+for key in combinedData.keys():
+    if 'organization' in combinedData[key]:
+        orgList.append(combinedData[key]['organization'])
+
+
 def tempReturnData():
-    return combinedData, portCount, osCount, locationDataFrame
+    return combinedData, portCount, osCount, locationDataFrame, orgList
 
 
 
