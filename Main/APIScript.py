@@ -316,7 +316,7 @@ def getLocation(combinedData) -> pd.DataFrame:
     
     return locationDataFrame
 
-'''
+
 # Runs the Shodan Func against an 'apache' option, this now is a dictionary of lots of data
 # IP: {ip}
 # HTTP Banner
@@ -507,9 +507,12 @@ locationDataFrame = pd.DataFrame(
 print("\nLocations")
 print(locationDataFrame)
 
+def tempReturnData():
+    return combinedData, portCount, osCount, locationDataFrame
 
 
 
+'''
 # User Form 
 with st.form("IoT Threat Mapper"):
     deviceType = st.text_input("IoT Device Type", "Camera")

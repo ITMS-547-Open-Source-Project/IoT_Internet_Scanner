@@ -30,10 +30,13 @@ with st.form("iot_threat_mapper_form"):
     submitted = st.form_submit_button("Search Devices")
     if submitted:
         with st.spinner("Querying public data..."):
-            data = api.combineAndGetAPIData(deviceType)
-            portCount = api.getPortCount(data)
-            osCount = api.getOS(data)
-            location = api.getLocation(data)
+            #data = api.combineAndGetAPIData(deviceType)
+            #portCount = api.getPortCount(data)
+            #osCount = api.getOS(data)
+            #location = api.getLocation(data)
+            deviceType = 'apache'
+            data, portCount, osCount, location = api.tempReturnData()
+            api.csvWrite(data)
         st.subheader("Scan Results")
         st.write(f"**Total Exposed '{deviceType}': {len(data)}")
         st.write("**Common Open Ports:**", portCount)
