@@ -15,6 +15,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import streamlit as st
+import ProcessingScripts as pro
 import APIScript as api
 
 # Session state to track form submission
@@ -45,51 +46,68 @@ if not st.session_state.form_submitted:
 # AFTER submit: split into two columns
 else:
  
-    col1, col2 = st.columns(2)
-
-    with col1:
-        # Create a form for user input
-        with st.form("iot_threat_mapper_form"):
-            deviceType = st.text_input("IoT Device Type", "apache")
-            submitted = st.form_submit_button("Search Devices")
-            if submitted:
-                with st.spinner("Querying public data..."):
-                    data = api.combineAndGetAPIData(deviceType)
-                    portCount = api.getPortCount(data)
-                    osCount = api.getOS(data)
-                    location = api.getLocation(data)
-                    orgList = api.getOrganizations(data)
-                    deviceType = 'apache'
-                   #data, portCount, osCount, location, orgList= api.tempReturnData()
-                   #api.csvWrite(data)
-                    dataTable = api.getTableData(data)
+    # Create a form for user input
+    with st.form("iot_threat_mapper_form"):
+        deviceType = st.text_input("IoT Device Type", "apache")
+        submitted = st.form_submit_button("Search Devices")
+        if submitted:
+            with st.spinner("Querying public data..."):
+                #data = api.combineAndGetAPIData(deviceType)
+                #portCount = api.getPortCount(data)
+                #osCount = api.getOS(data)
+                #location = api.getLocation(data)
+                #orgList = api.getOrganizations(data)
+                #deviceType = 'apache'
+                data, portCount, osCount, location, orgList, classificationData= api.tempReturnData()
+                api.csvWrite(data)
+                dataTable = api.getTableData(data)
     
-    with col2:
-        st.subheader("Device Geolocations")
-        st.markdown("The map shows the geographic location of these devices.")
-        st.map(location)
-        
     with st.container():
         st.subheader("Scan Results")
         col1, col2, col3 = st.columns(3)
         with col1:
             st.subheader("Exposed Organizations:")
-            for org in orgList:
-                st.write(org)
+            with st.expander("Click to see organizations"):
+                for org in orgList:
+                    st.write(org)
         with col2:
             st.subheader("Found Open Ports")
-            for key, value in portCount.items():
-                if isinstance(value, list):
-                    value = ", ".join(str(v) for v in value)
-                st.write(f"{key}: {value}")
+            with st.expander("Click to see open ports"):
+                for key, value in portCount.items():
+                    if isinstance(value, list):
+                        value = ", ".join(str(v) for v in value)
+                    st.write(f"{key}: {value}")
         with col3:
             st.subheader("Found Operating Systems")
-            for key, value in osCount.items():
-                if isinstance(value, list):
-                    value = ", ".join(str(v) for v in value)
-                st.write(f"{key}: {value}")
+            with st.expander("Found operating systems"):
+                for key, value in osCount.items():
+                    if isinstance(value, list):
+                        value = ", ".join(str(v) for v in value)
+                    st.write(f"{key}: {value}")
     # Expander for collapsible table
     with st.expander("Click to show table"):
         st.dataframe(dataTable)
+    
+    with st.container():
+
+        # Analysis/Graphs/Maps 
+        st.subheader("Analysis")
+        col1, col2, col3 = st.columns(3)
+
+        # Port Pie Chart
+        with col1:
+            st.subheader("Open Ports Distribution")
+            pro.makePortPieChart(portCount)
+        
+        # Geographic Map
+        with col2:
+            st.subheader("Device Geolocations")
+            st.markdown("The map shows the geographic location of these devices.")
+            st.map(location)
+        
+        # Classification Graph
+        with col3:
+            st.subheader("Classification Distribution")
+            pro.makeProductPieChart(classificationData)
     
     st.info("Note: This tool is in pre-alpha development")

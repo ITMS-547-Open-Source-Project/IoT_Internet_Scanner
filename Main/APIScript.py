@@ -311,6 +311,23 @@ def getProducts(combinedData) -> dict:
             else:
                 productCount[product] += 1
 
+    return productCount
+
+# Benign or not
+def getClassification(combineData) -> dict:
+    # Create a dict of classification
+    classificationDict = {}
+    for key in combinedData.keys():
+        if 'classification' in combinedData[key]:
+            classification = combinedData[key]['classification']
+            if classification not in classificationDict:
+                classificationDict[classification] = 1
+            else:
+                classificationDict[classification] += 1
+    
+    return classificationDict
+
+# Organizations
 def getOrganizations(combinedData) -> list:
     orgList = []
     for key in combinedData.keys():
@@ -544,9 +561,18 @@ for key in combinedData.keys():
     if 'organization' in combinedData[key]:
         orgList.append(combinedData[key]['organization'])
 
+classificationDict = {}
+for key in combinedData.keys():
+    if 'classification' in combinedData[key]:
+        classification = combinedData[key]['classification']
+        if classification not in classificationDict:
+            classificationDict[classification] = 1
+        else:
+            classificationDict[classification] += 1
+
 
 def tempReturnData():
-    return combinedData, portCount, osCount, locationDataFrame, orgList
+    return combinedData, portCount, osCount, locationDataFrame, orgList, classificationDict
 
 
 
