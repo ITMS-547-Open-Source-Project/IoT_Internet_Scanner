@@ -14,6 +14,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+# Run this tool in your web browser with ~$ streamlit run '.\GuiDisplay.py'
+
+
 import streamlit as st
 import ProcessingScripts as pro
 import APIScript as api
@@ -37,30 +40,44 @@ with st.container():
     Enter the device type and filtering criteria, and the system will display risk indicators based on open data sources.
     """)
 
-# BEFORE submit: show full-width form
-if not st.session_state.form_submitted:
-    with st.form("iot_threat_mapper_form"):
-        st.session_state.deviceType = st.text_input("IoT Device Type", "apache")
-        submitted = st.form_submit_button("Search Devices", on_click=handleSubmit)
+# BEFORE submit: show full-width form:
+with st.form("iot_threat_mapper_form"):
+    st.session_state.deviceType = st.text_input("IoT Device Type", "apache")
+    submitted = st.form_submit_button("Search for any device: ")
+    if submitted:
+        with st.spinner("Querying public data..."):
+            data = api.combineAndGetAPIData(st.session_state.deviceType)
+            portCount = api.getPortCount(data)
+            osCount = api.getOS(data)
+            location = api.getLocation(data)
+            orgList = api.getOrganizations(data)
+            classificationData = api.getClassification(data)
+            #deviceType = 'apache'
+            #data, portCount, osCount, location, orgList, classificationData= api.tempReturnData()
+            #api.csvWrite(data)
+            dataTable = api.getTableData(data)
 
-# AFTER submit: split into two columns
-else:
- 
-    # Create a form for user input
-    with st.form("iot_threat_mapper_form"):
-        deviceType = st.text_input("IoT Device Type", "apache")
-        submitted = st.form_submit_button("Search Devices")
-        if submitted:
-            with st.spinner("Querying public data..."):
-                #data = api.combineAndGetAPIData(deviceType)
-                #portCount = api.getPortCount(data)
-                #osCount = api.getOS(data)
-                #location = api.getLocation(data)
-                #orgList = api.getOrganizations(data)
-                #deviceType = 'apache'
-                data, portCount, osCount, location, orgList, classificationData= api.tempReturnData()
-                api.csvWrite(data)
-                dataTable = api.getTableData(data)
+            # Store data into session_state
+            st.session_state.update({
+                "form_submitted": True,
+                "data": data,
+                "portCount": portCount,
+                "osCount": osCount,
+                "location": location,
+                "orgList": orgList,
+                "classificationData": classificationData,
+                "dataTable": dataTable,
+            })
+
+# If form is already submitted, render results
+if st.session_state.get("form_submitted", False):
+    data = st.session_state.data
+    portCount = st.session_state.portCount
+    osCount = st.session_state.osCount
+    location = st.session_state.location
+    orgList = st.session_state.orgList
+    classificationData = st.session_state.classificationData
+    dataTable = st.session_state.dataTable
     
     with st.container():
         st.subheader("Scan Results")
@@ -109,5 +126,7 @@ else:
         with col3:
             st.subheader("Classification Distribution")
             pro.makeProductPieChart(classificationData)
+        
+            # 👇 Search again form (in sidebar or column)
     
     st.info("Note: This tool is in pre-alpha development")

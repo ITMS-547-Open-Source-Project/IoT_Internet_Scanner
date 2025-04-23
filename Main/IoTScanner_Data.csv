@@ -1,6 +1,0 @@
-ID,ip,results.[0].issuer.country,results.[0].issuer.organization,results.[0].fingerprint.md5,results.[0].fingerprint.sha1,results.[0].fingerprint.sha256,noise,riot,classification,hostname,city,region,country,loc,org,organization,os,port,hostnames,product
-8.8.8.8,8.8.8.8,AT,ZeroSSL,2f96dd3cd52d629337127b26c143eeee,b6e8f8fa4e9b8917aaab4276625ac12ebd1b7d82,9d5b06233574eefa4efde7db09d7f3c2b5f4a472f213423f49cfab8226113991,False,True,benign,dns.google,Mountain View,California,US,"38.0088,-122.1175",AS15169 Google LLC,CSL Computer Service Langenbach GmbH,,80,['vault.ceramtec.com'],Apache httpd
-1.1.1.1,1.1.1.1,AT,ZeroSSL,b3ef04c6fc615e247169bad4ce8a0e9e,94f7e76678d9eadb1b9e8823307bb43327790080,8d48334303aba3aa8a616844115e5243dec0273c13249c60454e88e7a41f5ad1,False,True,benign,one.one.one.one,Brisbane,Queensland,AU,"-27.4816,153.0175","AS13335 Cloudflare, Inc.","DigitalOcean, LLC",,80,['omega.host.webbedfeet.uk'],Apache httpd
-69.22.188.41,69.22.188.41,,,,,,,,,,,,,,,"PhotoShelter, Inc.",,443,"['photoshelter.com', 'le2.nyc.bitshelter.com']",
-143.244.72.12,143.244.72.12,,,,,,,,,,,,,,,YRC Inc.,,443,['citrix.yrcw.com'],
-66.96.163.133,66.96.163.133,,,,,,,,,,,,,,,"Newfold Digital, Inc.",,443,"['133.163.96.66.static.eigbox.net', 'bizland.com']",

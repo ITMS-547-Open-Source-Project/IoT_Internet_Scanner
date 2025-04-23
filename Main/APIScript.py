@@ -50,16 +50,21 @@ def _shodanFunc(device_type: str) -> list[dict]:
 
     try:
         results = api.search(device_type)
+
+        # Raise error if improper input
+        if not device_type or not isinstance(device_type, str) or device_type.strip() == "":
+            raise ValueError("Device type must be a non-empty string")
+        
         matches = results['matches']
 
         for result in matches:
             device = {
                 'ip': result.get('ip_str'),
-                'organization': result.get('org'),
-                'os': result.get('os'),
-                'port': result.get('port'),
-                'hostnames': result.get('hostnames'),
-                'product': result.get('product')
+                'organization': result.get('org', 'N/A'),
+                'os': result.get('os', 'N/A'),
+                'port': result.get('port', 'N/A'),
+                'hostnames': result.get('hostnames', 'N/A'),
+                'product': result.get('product', 'N/A')
             }
             devices.append(device)
 
