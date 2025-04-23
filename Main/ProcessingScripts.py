@@ -35,9 +35,9 @@ def makePortPieChart(portTotals) -> px.pie:
     # Streamlit embed
     st.plotly_chart(fig, use_container_width=True)
 
-def makeProductPieChart(benignData):
-    labels = [f"{data}" for data in benignData]
-    values = list(benignData.values())
+def makeClassificationPieChart(classificationData):
+    labels = [f"{data}" for data in classificationData]
+    values = list(classificationData.values())
 
     px.defaults.template = "plotly_dark" # use dark mode
 
