@@ -48,7 +48,7 @@ st.set_page_config(layout="wide")
 
 with st.container():
     # Title and description for the application
-    st.title("IoT Threat Mapper (Ethical Version)")
+    st.title("IoT Threat Mapper")
     st.markdown("""
     This tool allows you to explore publicly available data about exposed IoT devices without performing any unauthorized scanning.
     Enter the device type and filtering criteria, and the system will display risk indicators based on open data sources.
